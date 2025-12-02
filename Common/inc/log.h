@@ -1,0 +1,94 @@
+/*****************************************************************************
+ * Copyright (c) 2022, Nations Technologies Inc.
+ *
+ * All rights reserved.
+ * ****************************************************************************
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the disclaimer below.
+ *
+ * Nations' name may not be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY NATIONS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+ * DISCLAIMED. IN NO EVENT SHALL NATIONS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ****************************************************************************/
+
+/**
+ * @file log.h
+ * @author Nations Solution Team
+ * @version V1.2.2
+ *
+ * @copyright Copyright (c) 2022, Nations Technologies Inc. All rights reserved.
+ */
+#ifndef __LOG_H__
+#define __LOG_H__
+
+#ifndef LOG_ENABLE
+#define LOG_ENABLE 1
+#endif
+
+#if LOG_ENABLE
+
+#include <stdio.h>
+
+#define LOG_NONE    0
+#define LOG_ERROR   10
+#define LOG_WARNING 20
+#define LOG_INFO    30
+#define LOG_DEBUG   40
+
+#ifndef LOG_LEVEL
+#define LOG_LEVEL LOG_DEBUG
+#endif
+
+#if LOG_LEVEL >= LOG_INFO
+#define Log_Info(...) printf(__VA_ARGS__)
+#else
+#define Log_Info(...)
+#endif
+
+#if LOG_LEVEL >= LOG_ERROR
+#define Log_Error(...) printf(__VA_ARGS__)
+#else
+#define Log_Error(...)
+#endif
+
+#if LOG_LEVEL >= LOG_WARNING
+#define Log_Warn(...) printf(__VA_ARGS__)
+#else
+#define Log_Warn(...)
+#endif
+
+#if LOG_LEVEL >= LOG_DEBUG
+#define Log_Debug(...) printf(__VA_ARGS__)
+#else
+#define Log_Debug(...)
+#endif
+
+void Log_Init(void);
+
+#else /* !LOG_ENABLE */
+
+#define Log_Info(...)
+#define Log_Warn(...)
+#define Log_Error(...)
+#define Log_Debug(...)
+#define Log_Init()
+
+#endif
+
+#define Log_Func() Log_Debug("call %s\r\n", __FUNCTION__)
+
+#endif /* __LOG_H__ */
