@@ -1,7 +1,7 @@
 #include "lazer.h"
 #include <string.h>
 
-static bool data_ready = false;
+static volatile bool data_ready = false;
 static uint8_t usart2_buffer[8];
 static uint8_t usart2_len = 0;
 static uint8_t lazer_buffer[8];
@@ -122,5 +122,4 @@ void USART2_IRQHandler(void)
         // 触发数据就绪中断
         usart2_buffer[usart2_len++] = USART_ReceiveData(USART2);
     }
-    return;
 }

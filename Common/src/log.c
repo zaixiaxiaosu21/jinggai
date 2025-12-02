@@ -41,82 +41,47 @@
 #include "n32l40x_usart.h"
 #include "n32l40x_rcc.h"
 
-#define LOG_USARTx USART1
-#define LOG_PERIPH RCC_APB2_PERIPH_USART1
 #define LOG_GPIO GPIOA
 #define LOG_PERIPH_GPIO RCC_APB2_PERIPH_GPIOA
-#define LOG_TX_PIN GPIO_PIN_4
-#define LOG_RX_PIN GPIO_PIN_5
+#define LOG_TX_PIN GPIO_PIN_1
+#define LOG_RX_PIN GPIO_PIN_0
 
 void Log_Init(void)
 {
     GPIO_InitType GPIO_InitStructure;
-    USART_InitType USART_InitStructure;
+    LPUART_InitType LPUART_InitStructure;
     GPIO_InitStruct(&GPIO_InitStructure);
-    USART_StructInit(&USART_InitStructure);
+    LPUART_StructInit(&LPUART_InitStructure);
 
     RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_AFIO | LOG_PERIPH_GPIO, ENABLE);
 
-    RCC_EnableAPB2PeriphClk(LOG_PERIPH, ENABLE);
+    RCC_ConfigLPUARTClk(RCC_LPUARTCLK_SRC_APB1);
+    RCC_EnableRETPeriphClk(RCC_RET_PERIPH_LPUART, ENABLE);
 
     GPIO_InitStructure.Pin = LOG_TX_PIN;
-    GPIO_InitStructure.GPIO_Pull = GPIO_Pull_Up;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Slew_Rate = GPIO_Slew_Rate_High;
-    GPIO_InitStructure.GPIO_Alternate = GPIO_AF1_USART1;
+    GPIO_InitStructure.GPIO_Alternate = GPIO_AF6_LPUART;
     GPIO_InitPeripheral(LOG_GPIO, &GPIO_InitStructure);
 
     GPIO_InitStructure.Pin = LOG_RX_PIN;
     GPIO_InitStructure.GPIO_Pull = GPIO_Pull_Up;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Input;
-    GPIO_InitStructure.GPIO_Slew_Rate = GPIO_Slew_Rate_High;
-    GPIO_InitStructure.GPIO_Alternate = GPIO_AF4_USART1;
+    GPIO_InitStructure.GPIO_Alternate = GPIO_AF6_LPUART;
     GPIO_InitPeripheral(LOG_GPIO, &GPIO_InitStructure);
 
-    USART_InitStructure.BaudRate = 115200;
-    USART_InitStructure.WordLength = USART_WL_8B;
-    USART_InitStructure.StopBits = USART_STPB_1;
-    USART_InitStructure.Parity = USART_PE_NO;
-    USART_InitStructure.HardwareFlowControl = USART_HFCTRL_NONE;
-    USART_InitStructure.Mode = USART_MODE_TX | USART_MODE_RX;
-
-    // init uart
-    USART_Init(LOG_USARTx, &USART_InitStructure);
-
-    // enable uart
-    USART_Enable(LOG_USARTx, ENABLE);
+    LPUART_DeInit();
+    LPUART_InitStructure.BaudRate = 115200;
+    /* Configure LPUART */
+    LPUART_Init(&LPUART_InitStructure);
 }
-
-static int is_lr_sent = 0;
 
 int fputc(int ch, FILE *f)
 {
-    if (ch == '\r')
-    {
-        is_lr_sent = 1;
-    }
-    else if (ch == '\n')
-    {
-        if (!is_lr_sent)
-        {
-            USART_SendData(LOG_USARTx, (uint8_t)'\r');
-            /* Loop until the end of transmission */
-            while (USART_GetFlagStatus(LOG_USARTx, USART_FLAG_TXC) == RESET)
-            {
-            }
-        }
-        is_lr_sent = 0;
-    }
-    else
-    {
-        is_lr_sent = 0;
-    }
-    USART_SendData(LOG_USARTx, (uint8_t)ch);
-    /* Loop until the end of transmission */
-    while (USART_GetFlagStatus(LOG_USARTx, USART_FLAG_TXC) == RESET)
-    {
-    }
-    return ch;
+    LPUART_SendData((uint8_t)ch);
+    while (LPUART_GetFlagStatus(LPUART_FLAG_TXC) == RESET)
+        ;
+    LPUART_ClrFlag(LPUART_FLAG_TXC);
+
+    return (ch);
 }
 
 #ifdef USE_FULL_ASSERT
