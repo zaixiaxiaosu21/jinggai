@@ -39,23 +39,32 @@
 #include "log.h"
 #include "led.h"
 #include "lazer.h"
-
+#include "gps.h"
+#include "power.h"
 int main(void)
-{
+{   
+
     SysTick_Init();
     Log_Init();
     Led_Init();
     Lazer_Init();
-
-    Lazer_On();
+    GPS_Init();
+    Power_Init();
+    
+    Power_On();
+    //Lazer_On();
+    GPS_On();
     SysTick_Delay(100);
 
+
     while (1)
-    {    Log_Info("Reading Lazer Sensor Data...");
-        Lazer_Data_t lazer_data;
-        if (Lazer_Read(&lazer_data) == 0)
+    {    printf("Reading GPS data...\r\n");
+        GPS_Data_t gps_data;
+        if (GPS_GetData(&gps_data)==0)
         {
-            Log_Info("CO2: %u, CH2O: %u, VOC: %u", lazer_data.co2, lazer_data.ch2o, lazer_data.voc);
+            printf("Latitude: %.6f, Longitude: %.6f\r\n", gps_data.latitude, gps_data.longitude);
+           SysTick_Delay(1000);
         }
+        
     }
 }

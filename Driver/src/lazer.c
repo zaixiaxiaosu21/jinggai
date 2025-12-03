@@ -12,17 +12,17 @@ void Lazer_Init(void)
     GPIO_InitType GPIO_InitStructure;
     USART_InitType USART_InitStructure;
     NVIC_InitType NVIC_InitStructure;
-    // ¿ªÆôÊ±ÖÓ
+    // å¼€å¯æ—¶é’Ÿ
     RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_GPIOA | RCC_APB2_PERIPH_GPIOB, ENABLE);
     RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_USART2, ENABLE);
 
-    // ³õÊ¼»¯ENÒı½Å
+    // åˆå§‹åŒ–ENå¼•è„š
     GPIO_InitStruct(&GPIO_InitStructure);
     GPIO_InitStructure.Pin = LAZER_EN_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitPeripheral(LAZER_EN_PORT, &GPIO_InitStructure);
 
-    // ³õÊ¼»¯´®¿ÚÒı½Å
+    // åˆå§‹åŒ–ä¸²å£å¼•è„š
     GPIO_InitStruct(&GPIO_InitStructure);
     GPIO_InitStructure.Pin = GPIO_PIN_2 | GPIO_PIN_3;
     // GPIO_InitStructure.GPIO_Pull = GPIO_Pull_Up;
@@ -31,7 +31,7 @@ void Lazer_Init(void)
     GPIO_InitStructure.GPIO_Alternate = GPIO_AF4_USART2;
     GPIO_InitPeripheral(GPIOA, &GPIO_InitStructure);
 
-    // ³õÊ¼»¯´®¿Ú
+    // åˆå§‹åŒ–ä¸²å£
     USART_InitStructure.BaudRate = 9600;
     USART_InitStructure.WordLength = USART_WL_8B;
     USART_InitStructure.StopBits = USART_STPB_1;
@@ -40,7 +40,7 @@ void Lazer_Init(void)
     USART_InitStructure.Mode = USART_MODE_TX | USART_MODE_RX;
     USART_Init(USART2, &USART_InitStructure);
 
-    // ÅäÖÃ´®¿ÚÖĞ¶Ï
+    // é…ç½®ä¸²å£ä¸­æ–­
 
     /* Configure the NVIC Preemption Priority Bits */
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
@@ -55,23 +55,23 @@ void Lazer_Init(void)
     USART_ConfigInt(USART2, USART_INT_RXDNE, ENABLE);
     USART_ConfigInt(USART2, USART_INT_IDLEF, ENABLE);
 
-    // Æô¶¯´®¿Ú
+    // å¯åŠ¨ä¸²å£
     USART_Enable(USART2, ENABLE);
 }
 
 int Lazer_Read(Lazer_Data_t *data)
 {
-    // µÈ´ıÊı¾İ¾ÍĞ÷
+    // ç­‰å¾…æ•°æ®å°±ç»ª
     while (!data_ready)
         ;
-    // Êı¾İ¾ÍĞ÷ºó£¬ÖØĞÂ½«data_readyÖÃÎªfalse
+    // æ•°æ®å°±ç»ªåï¼Œé‡æ–°å°†data_readyç½®ä¸ºfalse
     data_ready = false;
-    // Ğ£ÑéÊÕµ½µÄÊı¾İ
+    // æ ¡éªŒæ”¶åˆ°çš„æ•°æ®
     if (lazer_len != 8)
         return -1;
 
     lazer_len = 0;
-    // Ğ£ÑéÊı¾İ
+    // æ ¡éªŒæ•°æ®
     if (lazer_buffer[0] != 0x5F)
         return -1;
 
@@ -108,18 +108,18 @@ void USART2_IRQHandler(void)
 {
     if (USART_GetIntStatus(USART2, USART_INT_IDLEF) == SET)
     {
-        // ´¥·¢¿ÕÏĞÖĞ¶Ï
+        // è§¦å‘ç©ºé—²ä¸­æ–­
         memcpy(lazer_buffer, usart2_buffer, usart2_len);
         lazer_len = usart2_len;
         usart2_len = 0;
         data_ready = true;
-        // ÇåÀíÖĞ¶Ï
+        // æ¸…ç†ä¸­æ–­
         USART_ReceiveData(USART2);
         return;
     }
     if (USART_GetIntStatus(USART2, USART_INT_RXDNE) == SET)
     {
-        // ´¥·¢Êı¾İ¾ÍĞ÷ÖĞ¶Ï
+        // è§¦å‘æ•°æ®å°±ç»ªä¸­æ–­
         usart2_buffer[usart2_len++] = USART_ReceiveData(USART2);
     }
 }
