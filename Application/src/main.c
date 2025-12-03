@@ -51,7 +51,7 @@ int main(void)
     SysTick_Delay(100);
 
     while (1)
-    {
+    {    Log_Info("Reading Lazer Sensor Data...");
         Lazer_Data_t lazer_data;
         if (Lazer_Read(&lazer_data) == 0)
         {
