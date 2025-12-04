@@ -40,6 +40,7 @@
 #include "led.h"
 #include "lazer.h"
 #include "gps.h"
+#include "qs100.h"
 #include "power.h"
 int main(void)
 {   
@@ -53,18 +54,12 @@ int main(void)
     
     Power_On();
     //Lazer_On();
-    GPS_On();
+    Int_QS100_Init();
     SysTick_Delay(100);
 
-
+    Int_QS100_Send_Data((uint8_t *)"Hello, QS100!", 14);
     while (1)
-    {    printf("Reading GPS data...\r\n");
-        GPS_Data_t gps_data;
-        if (GPS_GetData(&gps_data)==0)
-        {
-            printf("Latitude: %.6f, Longitude: %.6f\r\n", gps_data.latitude, gps_data.longitude);
-           SysTick_Delay(1000);
-        }
+    {  
         
     }
 }
