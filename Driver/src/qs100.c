@@ -101,6 +101,7 @@ static void uart_send(const uint8_t *data, size_t len)
         USART_SendData(USART1, data[i]);
         while (USART_GetFlagStatus(USART1, USART_FLAG_TXC) == RESET)
             ;
+             USART_ClrFlag(USART1, USART_FLAG_TXC);
     }
 }
 
@@ -108,15 +109,7 @@ static size_t uart_recv(uint8_t *data, size_t len, int frame_timeout_ms, int tim
 {
     size_t index = 0;
     uint32_t start = SysTick_GetTick();
-    // while (USART_GetFlagStatus(USART1, USART_FLAG_RXDNE) == RESET)
-    // {
-    //     if (SysTick_GetTick() - start > timeout_ms)
-    //     {
-    //         return 0;
-    //     }
-    // }
 
-    // start = SysTick_GetTick();
     while (index < len - 1)
     {
         if (USART_GetFlagStatus(USART1, USART_FLAG_RXDNE) == SET)
@@ -281,22 +274,34 @@ void Int_QS100_SendCmd(uint8_t *cmd, uint8_t *exceptStr)
     // 3. 接收数据直到遇到 "OK" 或 "ERROR"（根据需要调整结束条件）
     while (1)
     {
-        if (USART_GetFlagStatus(USART1, USART_FLAG_RXDNE) == SET)
+        // if (USART_GetFlagStatus(USART1, USART_FLAG_RXDNE) == SET)
+        // {
+        //     // 接收数据
+        //     uint8_t received_byte = USART_ReceiveData(USART1);
+        //     iot_buff[iot_buff_len++] = received_byte;
+
+        //     // 存储接收到的数据到 iot_full_buff
+        //     if (iot_buff_len > 0)
+        //     {
+        //         memcpy(&iot_full_buff[iot_full_buff_len], iot_buff, iot_buff_len);
+        //         iot_full_buff_len += iot_buff_len;
+
+        //         // 清空临时缓冲区
+        //         memset(iot_buff, 0, IOT_BUFF_MAX_LEN);
+        //         iot_buff_len = 0;
+        //     }
+        // }
+        // 使用uart_recv函数接收数据
+        iot_buff_len = uart_recv(iot_buff, IOT_BUFF_MAX_LEN, 1000, 5000);
+        // 存储接收到的数据到 iot_full_buff
+        if (iot_buff_len > 0)
         {
-            // 接收数据
-            uint8_t received_byte = USART_ReceiveData(USART1);
-            iot_buff[iot_buff_len++] = received_byte;
+            memcpy(&iot_full_buff[iot_full_buff_len], iot_buff, iot_buff_len);
+            iot_full_buff_len += iot_buff_len;
 
-            // 存储接收到的数据到 iot_full_buff
-            if (iot_buff_len > 0)
-            {
-                memcpy(&iot_full_buff[iot_full_buff_len], iot_buff, iot_buff_len);
-                iot_full_buff_len += iot_buff_len;
-
-                // 清空临时缓冲区
-                memset(iot_buff, 0, IOT_BUFF_MAX_LEN);
-                iot_buff_len = 0;
-            }
+            // 清空临时缓冲区
+            memset(iot_buff, 0, IOT_BUFF_MAX_LEN);
+            iot_buff_len = 0;
         }
 
         // 检查是否接收到期望的字符串（如 "OK" 或 "ERROR"）
