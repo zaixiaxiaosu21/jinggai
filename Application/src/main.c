@@ -42,6 +42,7 @@
 #include "gps.h"
 #include "qs100.h"
 #include "power.h"
+#include "lis3dh.h"
 int main(void)
 {   
 
@@ -54,12 +55,26 @@ int main(void)
     
     Power_On();
     //Lazer_On();
-    Int_QS100_Init();
+   // Int_QS100_Init();
     SysTick_Delay(100);
-
-    Int_QS100_Send_Data((uint8_t *)"Hello, QS100!", 14);
+     lis3dh_init();
+    
+    
+    SysTick_Delay(500);
+    Log_Info("Start");
     while (1)
-    {  
+    {
+        if (wake_up_reason & WAKE_UP_REASON_STOLEN)
+        {
+            Log_Info("Wake up by stolen\n");
+            wake_up_reason &= ~(WAKE_UP_REASON_STOLEN);
+        }
+        if (wake_up_reason & WAKE_UP_REASON_FALL)
+        {
+            Log_Info("Wake up by fall\n");
+            wake_up_reason &= ~(WAKE_UP_REASON_FALL);
+        }
         
     }
+    
 }
