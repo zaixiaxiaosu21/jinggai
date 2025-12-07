@@ -11,6 +11,6 @@ void Power_Init(void);
 void Power_On(void);
 
 void Power_Off(void);
-
+void Power_Sleep(void);
 
 #endif

@@ -14,5 +14,9 @@ typedef enum
 extern volatile int8_t wake_up_reason;
 
 void lis3dh_init(void);
+bool lis3dh_get_stolen_flag(void);
+
+bool lis3dh_get_fall_flag(void);
+
 
 #endif

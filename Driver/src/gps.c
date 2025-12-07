@@ -1,7 +1,7 @@
 #include "gps.h"
 #include <string.h>
 #include <stdlib.h>
-#define GPS_BUF_LEN 1024
+#define GPS_BUF_LEN 128
 
 static volatile bool gps_data_flag = false;
 static uint8_t uart5_buffer[GPS_BUF_LEN];

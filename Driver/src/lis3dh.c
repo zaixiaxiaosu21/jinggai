@@ -322,3 +322,17 @@ void lis3dh_init(void)
     
 
 }
+
+bool lis3dh_get_stolen_flag(void)
+{
+  bool ret= wake_up_reason &= WAKE_UP_REASON_FALL;
+    wake_up_reason &= ~WAKE_UP_REASON_FALL;
+    return ret;
+}
+
+bool lis3dh_get_fall_flag(void)
+{
+    bool ret= wake_up_reason &= WAKE_UP_REASON_STOLEN;
+        wake_up_reason &= ~WAKE_UP_REASON_STOLEN;
+        return ret;
+}

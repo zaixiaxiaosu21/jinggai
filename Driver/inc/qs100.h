@@ -14,7 +14,7 @@ typedef enum
   Common_ERROR
 } Common_Status_t;
 #define SERVER_ADDR "112.125.89.8"
-#define SERVER_PORT 32245
+#define SERVER_PORT 34735
 void Int_QS100_Init(void);
 
 /**
@@ -28,5 +28,10 @@ Common_Status_t Int_QS100_Send_Data(uint8_t *pData, uint16_t data_len);
 
 void Int_QS100_Enter_LowPower(void);
 
+void Qs100_Deinit(void);
+
+
+
+void Qs100_Off(void);
 #endif
 

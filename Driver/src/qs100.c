@@ -26,11 +26,11 @@ Common_Status_t Int_QS100_SendDataToServer(uint8_t socket, uint8_t *pData, uint1
 /* 关闭socket服务 */
 Common_Status_t Int_QS100_CloseClient(uint8_t socket);
 
-#define IOT_FULL_BUFF_MAX_LEN 512
+#define IOT_FULL_BUFF_MAX_LEN 1024
 uint8_t iot_full_buff[IOT_FULL_BUFF_MAX_LEN] = {0};
 uint16_t iot_full_buff_len = 0;
 
-#define IOT_BUFF_MAX_LEN 128
+#define IOT_BUFF_MAX_LEN 256
 uint8_t iot_buff[IOT_BUFF_MAX_LEN] = {0};
 uint16_t iot_buff_len = 0;
 
@@ -274,35 +274,35 @@ void Int_QS100_SendCmd(uint8_t *cmd, uint8_t *exceptStr)
     // 3. 接收数据直到遇到 "OK" 或 "ERROR"（根据需要调整结束条件）
     while (1)
     {
-        // if (USART_GetFlagStatus(USART1, USART_FLAG_RXDNE) == SET)
-        // {
-        //     // 接收数据
-        //     uint8_t received_byte = USART_ReceiveData(USART1);
-        //     iot_buff[iot_buff_len++] = received_byte;
-
-        //     // 存储接收到的数据到 iot_full_buff
-        //     if (iot_buff_len > 0)
-        //     {
-        //         memcpy(&iot_full_buff[iot_full_buff_len], iot_buff, iot_buff_len);
-        //         iot_full_buff_len += iot_buff_len;
-
-        //         // 清空临时缓冲区
-        //         memset(iot_buff, 0, IOT_BUFF_MAX_LEN);
-        //         iot_buff_len = 0;
-        //     }
-        // }
-        // 使用uart_recv函数接收数据
-        iot_buff_len = uart_recv(iot_buff, IOT_BUFF_MAX_LEN, 1000, 5000);
-        // 存储接收到的数据到 iot_full_buff
-        if (iot_buff_len > 0)
+        if (USART_GetFlagStatus(USART1, USART_FLAG_RXDNE) == SET)
         {
-            memcpy(&iot_full_buff[iot_full_buff_len], iot_buff, iot_buff_len);
-            iot_full_buff_len += iot_buff_len;
+            // 接收数据
+            uint8_t received_byte = USART_ReceiveData(USART1);
+            iot_buff[iot_buff_len++] = received_byte;
 
-            // 清空临时缓冲区
-            memset(iot_buff, 0, IOT_BUFF_MAX_LEN);
-            iot_buff_len = 0;
+            // 存储接收到的数据到 iot_full_buff
+            if (iot_buff_len > 0)
+            {
+                memcpy(&iot_full_buff[iot_full_buff_len], iot_buff, iot_buff_len);
+                iot_full_buff_len += iot_buff_len;
+
+                // 清空临时缓冲区
+                memset(iot_buff, 0, IOT_BUFF_MAX_LEN);
+                iot_buff_len = 0;
+            }
         }
+        // // 使用uart_recv函数接收数据
+        // iot_buff_len = uart_recv(iot_buff, IOT_BUFF_MAX_LEN, 1000, );
+        // // 存储接收到的数据到 iot_full_buff
+        // if (iot_buff_len > 0)
+        // {
+        //     memcpy(&iot_full_buff[iot_full_buff_len], iot_buff, iot_buff_len);
+        //     iot_full_buff_len += iot_buff_len;
+
+        //     // 清空临时缓冲区
+        //     memset(iot_buff, 0, IOT_BUFF_MAX_LEN);
+        //     iot_buff_len = 0;
+        // }
 
         // 检查是否接收到期望的字符串（如 "OK" 或 "ERROR"）
         if (exceptStr != NULL)
@@ -389,7 +389,7 @@ Common_Status_t Int_QS100_SendDataToServer(uint8_t socket, uint8_t *pData, uint1
       - 十六进制： 010203040506
   */
   // 1. 准备十六进制字符串的容器并计算长度
-  uint16_t hex_data_len = data_len * 2 + 1;
+  uint16_t hex_data_len = data_len * 2 + 1; // +1 是为了存放字符串结束符 '\0'
   uint8_t hex_data[hex_data_len];
 
   // uint8_t *hex_data = malloc(hex_data_len);
@@ -402,7 +402,7 @@ Common_Status_t Int_QS100_SendDataToServer(uint8_t socket, uint8_t *pData, uint1
   }
 
   // 3. 拼接字符串
-  sprintf((char *)send_data_cmd, "AT+NSOSD=%d,%d,%s,0x200,%d\r\n", socket, data_len, hex_data, SEQUENCE);
+  sprintf((char *)send_data_cmd, "AT+NSOSD=%d,%d,%s,0x100,%d\r\n", socket, data_len, hex_data, SEQUENCE);
 
   // 4. 发送数据
   Int_QS100_SendCmd(send_data_cmd, "+NSOSTR:");
@@ -445,3 +445,14 @@ void Int_QS100_Enter_LowPower(void)
 }
 
 //实现uart1收发 中断服务函数
+void Qs100_Deinit(void)
+{
+    USART_DeInit(USART1);
+}
+
+
+
+void Qs100_Off(void)
+{
+    GPIO_SetBits(QS100_EN_PORT, QS100_EN_PIN);
+}

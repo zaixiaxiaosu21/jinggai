@@ -1,5 +1,6 @@
 #include "power.h"
-
+#include "systick.h"
+#include "rtc_wakeup.h"
 void Power_Init(void)
 {
     GPIO_InitType GPIO_InitStructure;
@@ -22,4 +23,13 @@ void Power_On(void)
 void Power_Off(void)
 {
     GPIO_ResetBits(POWER_PORT, POWER_PIN);
+}
+
+void Power_Sleep(void)
+{
+    RTC_EnableWakeUp(ENABLE);
+    SysTick_Delay(20);
+    PWR_EnterSTOP2Mode(PWR_STOPENTRY_WFI, PWR_CTRL3_RAM1RET | PWR_CTRL3_RAM2RET);
+    SysTick_Delay(20);
+    RTC_EnableWakeUp(DISABLE);
 }
